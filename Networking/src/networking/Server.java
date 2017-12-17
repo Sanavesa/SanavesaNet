@@ -172,7 +172,7 @@ public class Server
 
 		// Trigger the event
 		onServerStopped(port);
-		
+
 		// Reset instance
 		resetInstance();
 	}
@@ -236,13 +236,12 @@ public class Server
 		{
 			try
 			{
-				// Accept new connections
-				// The accept method will block the thread until a client
-				// asks for a connection
-				// The only way to break the thread blocking is to close the
-				// server socket
+				/*
+				 * Accept new connections: The accept method will block the
+				 * thread until a client asks for a connection. The only way to
+				 * break the thread blocking is to close the server socket.
+				 */
 				Socket newSocket = serverSocket.accept();
-				
 				new ServerClient(this, newSocket);
 			}
 			catch (Exception e)
@@ -325,7 +324,9 @@ public class Server
 	/**
 	 * This method is triggered automatically when the server has received data
 	 * from any client. The data received is a class that implements the
-	 * {@link NetworkSerializable} interface.
+	 * {@link NetworkSerializable} interface. The data received is handled by
+	 * the interface via the {@link NetworkSerializable#handleOnServer(Server)}
+	 * method.
 	 * 
 	 * @param <T>
 	 *            - the class type of the data received
@@ -340,8 +341,9 @@ public class Server
 	 * @since 1.0
 	 * @author Mohammad Alali
 	 */
-	protected <T extends NetworkSerializable> void onReceivedData(T data, ServerClient sender)
+	private final <T extends NetworkSerializable> void onReceivedData(T data, ServerClient sender)
 	{
+		data.handleOnServer(this, sender);
 	}
 
 	/**

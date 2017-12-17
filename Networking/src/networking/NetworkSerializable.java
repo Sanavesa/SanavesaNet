@@ -11,7 +11,8 @@ import java.io.Serializable;
  * implementer to be sent over the network. The interface provides a default
  * serialization and deserialization method, which can be overridden. It is
  * extremely preferable to generate a <code>serialVersionUID</code> for the
- * implementer.
+ * implementer. Moreover, this interface contains methods to handle the packet
+ * for both the client and the server.
  * 
  * @see Client
  * @see Server
@@ -63,4 +64,40 @@ public interface NetworkSerializable extends Serializable
 	{
 		in.defaultReadObject();
 	}
+
+	/**
+	 * This method is invoked on the client side whenever this object is read by
+	 * the client.
+	 * 
+	 * @param <T>
+	 *            - the class type of the client who received this object
+	 * @param client
+	 *            - the client who read this serializable object
+	 * 
+	 * @see Client
+	 * 
+	 * @since 1.1
+	 * @author Mohammad Alali
+	 */
+	<T extends Client> void handleOnClient(T client);
+
+	/**
+	 * This method is invoked on the server side whenever this object is read by
+	 * the server.
+	 * 
+	 * @param <T>
+	 *            - the class type of the server who received this object
+	 * @param <K>
+	 *            - the class type of the client who sent this object
+	 * @param server
+	 *            - the server who read this serializable object
+	 * @param client
+	 *            - the client who sent this object
+	 * 
+	 * @see Server
+	 * 
+	 * @since 1.1
+	 * @author Mohammad Alali
+	 */
+	<T extends Server, K extends Client> void handleOnServer(T server, K client);
 }

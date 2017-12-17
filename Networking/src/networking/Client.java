@@ -19,8 +19,11 @@ import java.net.Socket;
  */
 public class Client
 {
-	/** The duration in milliseconds for connection timeout. */
-	protected final static int TIMEOUT_DURATION = 3000;
+	/**
+	 * The duration in milliseconds for connection timeout. Default value is 5
+	 * seconds.
+	 */
+	protected final static int TIMEOUT_DURATION = 5000;
 
 	/** The client's socket. */
 	Socket socket = null;
@@ -196,7 +199,7 @@ public class Client
 
 		// Trigger the event
 		onDisconnected(ipAddress, port);
-		
+
 		// Reset socket locally
 		resetInstance();
 	}
@@ -272,7 +275,7 @@ public class Client
 			{
 				data = networkCommunication.readData();
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
 				// Ignore handling
 			}
@@ -280,17 +283,8 @@ public class Client
 			// If there is data, process it
 			if (data != null)
 			{
-				// Handle disconnected packet internally
-				if (data instanceof DisconnectClientPacket)
-				{
-					// The server wants to disconnect us.
-					disconnect(false);
-				}
-				// Otherwise, notify the user of the data received
-				else
-				{
-					onReceivedData(data);
-				}
+				// Handle the data received
+				onReceivedData(data);
 			}
 		}
 	}
@@ -346,7 +340,9 @@ public class Client
 	/**
 	 * This method is triggered automatically when the client has received data
 	 * from the server. The data received is a class that implements the
-	 * {@link NetworkSerializable} interface.
+	 * {@link NetworkSerializable} interface. The data received is handled by
+	 * the interface via the {@link NetworkSerializable#handleOnClient(Client)}
+	 * method.
 	 * 
 	 * @param <T>
 	 *            - the class type of the data received
@@ -358,8 +354,25 @@ public class Client
 	 * @since 1.0
 	 * @author Mohammad Alali
 	 */
-	protected <T extends NetworkSerializable> void onReceivedData(T data)
+	<T extends NetworkSerializable> void onReceivedData(T data)
 	{
+		data.handleOnClient(this);
+	}
+
+	/**
+	 * Sends the specified data object to the server.
+	 * 
+	 * @param <T>
+	 *            - the class type of the data to send
+	 * @param data
+	 *            - the data to send to the server
+	 * 
+	 * @since 1.1
+	 * @author Mohammad Alali
+	 */
+	public final <T extends NetworkSerializable> void sendData(T data)
+	{
+		networkCommunication.sendData(data);
 	}
 
 	/**
