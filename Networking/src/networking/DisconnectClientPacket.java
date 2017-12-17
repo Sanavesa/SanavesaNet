@@ -1,5 +1,7 @@
 package networking;
 
+import networking.Server.ServerClient;
+
 /**
  * The <code>DisconnectClientPacket</code> class is a special packet type that
  * is used internally to disconnect clients from the server.
@@ -45,8 +47,6 @@ class DisconnectClientPacket implements NetworkSerializable
 	 * 
 	 * @param <T>
 	 *            - the class type of the server who received this object
-	 * @param <K>
-	 *            - the class type of the client who sent this object
 	 * @param server
 	 *            - the server who read this serializable object
 	 * @param client
@@ -58,9 +58,9 @@ class DisconnectClientPacket implements NetworkSerializable
 	 * @author Mohammad Alali
 	 */
 	@Override
-	public <T extends Server, K extends Client> void handleOnServer(T server, K client)
+	public <T extends Server> void handleOnServer(T server, ServerClient sender)
 	{
 		// The client requested the server to disconnect him
-		client.disconnect(false);
+		sender.disconnect(false);
 	}
 }

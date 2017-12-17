@@ -5,6 +5,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+import networking.Server.ServerClient;
+
 /**
  * The {@link NetworkSerializable} interface is the core of the networking data
  * transmission. It provides an interface that implemented, allows the
@@ -79,7 +81,10 @@ public interface NetworkSerializable extends Serializable
 	 * @since 1.1
 	 * @author Mohammad Alali
 	 */
-	<T extends Client> void handleOnClient(T client);
+	default <T extends Client> void handleOnClient(T client)
+	{
+		// No implementation
+	}
 
 	/**
 	 * This method is invoked on the server side whenever this object is read by
@@ -87,8 +92,6 @@ public interface NetworkSerializable extends Serializable
 	 * 
 	 * @param <T>
 	 *            - the class type of the server who received this object
-	 * @param <K>
-	 *            - the class type of the client who sent this object
 	 * @param server
 	 *            - the server who read this serializable object
 	 * @param client
@@ -99,5 +102,8 @@ public interface NetworkSerializable extends Serializable
 	 * @since 1.1
 	 * @author Mohammad Alali
 	 */
-	<T extends Server, K extends Client> void handleOnServer(T server, K client);
+	default <T extends Server> void handleOnServer(T server, ServerClient sender)
+	{
+		// No implementation
+	}
 }
