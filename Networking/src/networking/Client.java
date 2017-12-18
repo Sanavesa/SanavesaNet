@@ -40,6 +40,30 @@ public class Client
 	volatile boolean connected = false;
 
 	/**
+	 * Constructs a new <code>Client</code> instance. The constructor sets up
+	 * the shutdown hook for when the client is terminated unexpectedly by
+	 * disconnecting from the server. It will terminate the connection and its
+	 * streams, and stop the communication thread.
+	 * 
+	 * @see #disconnect()
+	 * 
+	 * @since 1.1
+	 * @author Mohammad Alali
+	 */
+	public Client()
+	{
+		// Sets up the hook
+		Runtime.getRuntime().addShutdownHook(new Thread()
+		{
+			@Override
+			public void run()
+			{
+				disconnect();
+			}
+		});
+	}
+
+	/**
 	 * Used internally to reset the instance's variables. It will terminate the
 	 * connection and its streams, and stop the communication thread.
 	 * 

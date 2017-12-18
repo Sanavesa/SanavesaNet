@@ -43,6 +43,30 @@ public class Server
 	private volatile boolean running = false;
 
 	/**
+	 * Constructs a new <code>Server</code> instance. The constructor sets up
+	 * the shutdown hook for when the server is terminated unexpectedly by
+	 * disconnecting all clients from the server. It will terminate all
+	 * server connections and stop the listening thread.
+	 * 
+	 * @see #stopServer()
+	 * 
+	 * @since 1.1
+	 * @author Mohammad Alali
+	 */
+	public Server()
+	{
+		// Sets up the hook
+		Runtime.getRuntime().addShutdownHook(new Thread()
+		{
+			@Override
+			public void run()
+			{
+				stopServer();
+			}
+		});
+	}
+	
+	/**
 	 * Used internally to reset the instance's variables. It will terminate all
 	 * server connections and stop the listening thread.
 	 * 
