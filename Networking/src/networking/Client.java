@@ -20,16 +20,59 @@ import java.net.Socket;
 public class Client
 {
 	/**
+	 * The <code>ClientThread</code> class manages the networking transmission
+	 * on a separate thread.
+	 * 
+	 * @see Client
+	 * 
+	 * @since 1.0
+	 * @author Mohammad Alali
+	 */
+	final class ClientThread implements Runnable
+	{
+		/** The client owner of this thread. */
+		private final Client client;
+
+		/**
+		 * Creates a new thread for the client, and calls begins the networking
+		 * communication loop.
+		 * 
+		 * @param client
+		 *            - the client owner of the thread
+		 * 
+		 * @see Client
+		 * 
+		 * @since 1.0
+		 * @author Mohammad Alali
+		 */
+		public ClientThread(Client client)
+		{
+			this.client = client;
+		}
+
+		/**
+		 * Starts the communication thread for the client that would keep
+		 * listening for new data while it is still connected. This method
+		 * should not be called explicitly as it automatically managed by the
+		 * {@link Runnable} interface.
+		 * 
+		 * @see Client
+		 * 
+		 * @since 1.0
+		 * @author Mohammad Alali
+		 */
+		@Override
+		public void run()
+		{
+			client.run();
+		}
+	}
+
+	/**
 	 * The duration in milliseconds for connection timeout. Default value is 5
 	 * seconds.
 	 */
 	protected final static int TIMEOUT_DURATION = 5000;
-
-	/** The client's socket. */
-	Socket socket = null;
-
-	/** The communication for the socket. */
-	NetworkCommunication networkCommunication = null;
 
 	/**
 	 * The client's own thread to handle incoming and outgoing communication.
@@ -38,6 +81,12 @@ public class Client
 
 	/** A flag of whether the client is connected. */
 	volatile boolean connected = false;
+
+	/** The communication for the socket. */
+	NetworkCommunication networkCommunication = null;
+
+	/** The client's socket. */
+	Socket socket = null;
 
 	/**
 	 * Constructs a new <code>Client</code> instance. The constructor sets up
@@ -61,54 +110,6 @@ public class Client
 				disconnect();
 			}
 		});
-	}
-
-	/**
-	 * Used internally to reset the instance's variables. It will terminate the
-	 * connection and its streams, and stop the communication thread.
-	 * 
-	 * @since 1.0
-	 * @author Mohammad Alali
-	 */
-	final void resetInstance()
-	{
-		// Change the connection flag
-		connected = false;
-
-		// Stop and reset communication streams
-		if (networkCommunication != null)
-		{
-			networkCommunication.close();
-			networkCommunication = null;
-		}
-
-		// Stop and reset communication thread
-		if (communicationThread != null)
-		{
-			try
-			{
-				communicationThread.join(10);
-			}
-			catch (InterruptedException e)
-			{
-				// Ignore handling
-			}
-			communicationThread = null;
-		}
-
-		// Close and reset socket
-		if (socket != null)
-		{
-			try
-			{
-				socket.close();
-			}
-			catch (IOException e)
-			{
-				// Ignore handling
-			}
-			socket = null;
-		}
 	}
 
 	/**
@@ -229,19 +230,6 @@ public class Client
 	}
 
 	/**
-	 * Returns the connection status of the client.
-	 * 
-	 * @return true if the client is connected to the server; false otherwise
-	 * 
-	 * @since 1.0
-	 * @author Mohammad Alali
-	 */
-	public final boolean isConnected()
-	{
-		return connected;
-	}
-
-	/**
 	 * If the client is connected to a server, this method will return the
 	 * network communication instance of the client that aids in transmitting
 	 * and receiving data from the server. And if the client is not connected,
@@ -273,44 +261,16 @@ public class Client
 	}
 
 	/**
-	 * The <code>run</code> method handles the incoming networking transmission.
-	 * This method should never be explicitly called as it automatically handled
-	 * by the {@link ClientThread} class, which calls this method on a separate
-	 * thread.
+	 * Returns the connection status of the client.
 	 * 
-	 * <p>
-	 * Incoming data will trigger the
-	 * {@link #onReceivedData(NetworkSerializable)} method, where the user is
-	 * able to override and handle the data as he or she wishes.
-	 * </p>
-	 * 
-	 * @see ClientThread
+	 * @return true if the client is connected to the server; false otherwise
 	 * 
 	 * @since 1.0
 	 * @author Mohammad Alali
 	 */
-	private final void run()
+	public final boolean isConnected()
 	{
-		while (isConnected())
-		{
-			// Get recent data from stream
-			NetworkSerializable data = null;
-			try
-			{
-				data = networkCommunication.readData();
-			}
-			catch (Exception e)
-			{
-				// Ignore handling
-			}
-
-			// If there is data, process it
-			if (data != null)
-			{
-				// Handle the data received
-				onReceivedData(data);
-			}
-		}
+		return connected;
 	}
 
 	/**
@@ -384,6 +344,95 @@ public class Client
 	}
 
 	/**
+	 * Used internally to reset the instance's variables. It will terminate the
+	 * connection and its streams, and stop the communication thread.
+	 * 
+	 * @since 1.0
+	 * @author Mohammad Alali
+	 */
+	final void resetInstance()
+	{
+		// Change the connection flag
+		connected = false;
+
+		// Stop and reset communication streams
+		if (networkCommunication != null)
+		{
+			networkCommunication.close();
+			networkCommunication = null;
+		}
+
+		// Stop and reset communication thread
+		if (communicationThread != null)
+		{
+			try
+			{
+				communicationThread.join(10);
+			}
+			catch (InterruptedException e)
+			{
+				// Ignore handling
+			}
+			communicationThread = null;
+		}
+
+		// Close and reset socket
+		if (socket != null)
+		{
+			try
+			{
+				socket.close();
+			}
+			catch (IOException e)
+			{
+				// Ignore handling
+			}
+			socket = null;
+		}
+	}
+
+	/**
+	 * The <code>run</code> method handles the incoming networking transmission.
+	 * This method should never be explicitly called as it automatically handled
+	 * by the {@link ClientThread} class, which calls this method on a separate
+	 * thread.
+	 * 
+	 * <p>
+	 * Incoming data will trigger the
+	 * {@link #onReceivedData(NetworkSerializable)} method, where the user is
+	 * able to override and handle the data as he or she wishes.
+	 * </p>
+	 * 
+	 * @see ClientThread
+	 * 
+	 * @since 1.0
+	 * @author Mohammad Alali
+	 */
+	private final void run()
+	{
+		while (isConnected())
+		{
+			// Get recent data from stream
+			NetworkSerializable data = null;
+			try
+			{
+				data = networkCommunication.readData();
+			}
+			catch (Exception e)
+			{
+				// Ignore handling
+			}
+
+			// If there is data, process it
+			if (data != null)
+			{
+				// Handle the data received
+				onReceivedData(data);
+			}
+		}
+	}
+
+	/**
 	 * Sends the specified data object to the server.
 	 * 
 	 * @param <T>
@@ -397,54 +446,5 @@ public class Client
 	public final <T extends NetworkSerializable> void sendData(T data)
 	{
 		networkCommunication.sendData(data);
-	}
-
-	/**
-	 * The <code>ClientThread</code> class manages the networking transmission
-	 * on a separate thread.
-	 * 
-	 * @see Client
-	 * 
-	 * @since 1.0
-	 * @author Mohammad Alali
-	 */
-	final class ClientThread implements Runnable
-	{
-		/** The client owner of this thread. */
-		private final Client client;
-
-		/**
-		 * Creates a new thread for the client, and calls begins the networking
-		 * communication loop.
-		 * 
-		 * @param client
-		 *            - the client owner of the thread
-		 * 
-		 * @see Client
-		 * 
-		 * @since 1.0
-		 * @author Mohammad Alali
-		 */
-		public ClientThread(Client client)
-		{
-			this.client = client;
-		}
-
-		/**
-		 * Starts the communication thread for the client that would keep
-		 * listening for new data while it is still connected. This method
-		 * should not be called explicitly as it automatically managed by the
-		 * {@link Runnable} interface.
-		 * 
-		 * @see Client
-		 * 
-		 * @since 1.0
-		 * @author Mohammad Alali
-		 */
-		@Override
-		public void run()
-		{
-			client.run();
-		}
 	}
 }

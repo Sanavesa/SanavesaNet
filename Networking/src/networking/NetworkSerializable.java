@@ -25,49 +25,6 @@ import networking.Server.ServerClient;
 public interface NetworkSerializable extends Serializable
 {
 	/**
-	 * This method provides the capability to override the default
-	 * implementation of writing an object to the stream. The default
-	 * implementation will serialize all non-transient, non-static fields.
-	 * 
-	 * @param out
-	 *            - the stream to write to
-	 * @throws IOException
-	 *             - thrown when any I/O errors occur
-	 * 
-	 * @see ObjectOutputStream
-	 * 
-	 * @since 1.0
-	 * @author Mohammad Alali
-	 */
-	default void writeObject(ObjectOutputStream out) throws IOException
-	{
-		out.defaultWriteObject();
-	}
-
-	/**
-	 * This method provides the capability to override the default
-	 * implementation of reading an object from the stream. The default
-	 * implementation will serialize all non-transient, non-static fields.
-	 * 
-	 * @param in
-	 *            - the stream to read from
-	 * @throws IOException
-	 *             - thrown when any I/O errors occur
-	 * @throws ClassNotFoundException
-	 *             - thrown when the class read is not found anywhere in the
-	 *             class files
-	 * 
-	 * @see ObjectInputStream
-	 * 
-	 * @since 1.0
-	 * @author Mohammad Alali
-	 */
-	default void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException
-	{
-		in.defaultReadObject();
-	}
-
-	/**
 	 * This method is invoked on the client side whenever this object is read by
 	 * the client.
 	 * 
@@ -105,5 +62,48 @@ public interface NetworkSerializable extends Serializable
 	default <T extends Server> void handleOnServer(T server, ServerClient sender)
 	{
 		// No implementation
+	}
+
+	/**
+	 * This method provides the capability to override the default
+	 * implementation of reading an object from the stream. The default
+	 * implementation will serialize all non-transient, non-static fields.
+	 * 
+	 * @param in
+	 *            - the stream to read from
+	 * @throws IOException
+	 *             - thrown when any I/O errors occur
+	 * @throws ClassNotFoundException
+	 *             - thrown when the class read is not found anywhere in the
+	 *             class files
+	 * 
+	 * @see ObjectInputStream
+	 * 
+	 * @since 1.0
+	 * @author Mohammad Alali
+	 */
+	default void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException
+	{
+		in.defaultReadObject();
+	}
+
+	/**
+	 * This method provides the capability to override the default
+	 * implementation of writing an object to the stream. The default
+	 * implementation will serialize all non-transient, non-static fields.
+	 * 
+	 * @param out
+	 *            - the stream to write to
+	 * @throws IOException
+	 *             - thrown when any I/O errors occur
+	 * 
+	 * @see ObjectOutputStream
+	 * 
+	 * @since 1.0
+	 * @author Mohammad Alali
+	 */
+	default void writeObject(ObjectOutputStream out) throws IOException
+	{
+		out.defaultWriteObject();
 	}
 }

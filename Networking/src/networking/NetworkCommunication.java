@@ -19,11 +19,11 @@ import java.net.Socket;
  */
 public final class NetworkCommunication
 {
-	/** The output stream of the connection. */
-	private final ObjectOutputStream outputWriter;
-
 	/** The input stream of the connection. */
 	private final ObjectInputStream inputReader;
+
+	/** The output stream of the connection. */
+	private final ObjectOutputStream outputWriter;
 
 	/**
 	 * Sets up the input and output streams of the socket for network
@@ -62,105 +62,6 @@ public final class NetworkCommunication
 		catch (Exception e)
 		{
 			throw new RuntimeException(e);
-		}
-	}
-
-	/**
-	 * Writes the specified <code>data</code> into the connection's output
-	 * stream, and flushes the stream.
-	 * 
-	 * @param <T>
-	 *            - the class type of the data received
-	 * @param data
-	 *            - the data object to send
-	 * 
-	 * @throws IllegalArgumentException
-	 *             - thrown when the parameter <code>data</code> is null.
-	 * @throws NullPointerException
-	 *             - thrown when the connection's output stream is null.
-	 * @throws RuntimeException
-	 *             - thrown when facing issues writing to the connection's
-	 *             output stream.
-	 * 
-	 * @see NetworkSerializable
-	 * 
-	 * @since 1.0
-	 * @author Mohammad Alali
-	 */
-	public final <T extends NetworkSerializable> void sendData(T data)
-			throws IllegalArgumentException, NullPointerException, RuntimeException
-	{
-		// Validate data parameter
-		if (data == null)
-		{
-			throw new IllegalArgumentException("Method parameter 'data' is null in NetworkConnection::sendData.");
-		}
-
-		// Validate output stream
-		if (outputWriter == null)
-		{
-			throw new NullPointerException("Class member 'outputWriter' is null in NetworkConnection::sendData.");
-		}
-
-		// Send data
-		synchronized (outputWriter)
-		{
-			try
-			{
-				outputWriter.writeObject(data);
-				outputWriter.flush();
-			}
-			catch (Exception e)
-			{
-				throw new RuntimeException(e);
-			}
-		}
-	}
-
-	/**
-	 * Reads and returns an object from the connection's streams. If there was
-	 * nothing to read or if it read a non-supported object, the method will
-	 * return null. Supported types are classes that implement the
-	 * {@link NetworkSerializable} interface.
-	 * 
-	 * @return the received object, or null if received nothing.
-	 * 
-	 * @throws NullPointerException
-	 *             - thrown when the connection's input stream is null.
-	 * @throws RuntimeException
-	 *             - thrown when facing issues reading from the connection's
-	 *             input stream.
-	 * 
-	 * @see NetworkSerializable
-	 * 
-	 * @since 1.0
-	 * @author Mohammad Alali
-	 */
-	public final NetworkSerializable readData() throws RuntimeException
-	{
-		// Validate input stream
-		if (inputReader == null)
-		{
-			throw new NullPointerException("Class member 'inputReader' is null in NetworkConnection::readData.");
-		}
-
-		// Read data
-		synchronized (inputReader)
-		{
-			Object obj;
-			try
-			{
-				obj = inputReader.readObject();
-			}
-			catch (Exception e)
-			{
-				throw new RuntimeException(e);
-			}
-
-			if (obj instanceof NetworkSerializable)
-				return (NetworkSerializable) obj;
-
-			return null;
 		}
 	}
 
@@ -213,6 +114,105 @@ public final class NetworkCommunication
 			catch (IOException e)
 			{
 				// Ignore handling
+			}
+		}
+	}
+
+	/**
+	 * Reads and returns an object from the connection's streams. If there was
+	 * nothing to read or if it read a non-supported object, the method will
+	 * return null. Supported types are classes that implement the
+	 * {@link NetworkSerializable} interface.
+	 * 
+	 * @return the received object, or null if received nothing.
+	 * 
+	 * @throws NullPointerException
+	 *             - thrown when the connection's input stream is null.
+	 * @throws RuntimeException
+	 *             - thrown when facing issues reading from the connection's
+	 *             input stream.
+	 * 
+	 * @see NetworkSerializable
+	 * 
+	 * @since 1.0
+	 * @author Mohammad Alali
+	 */
+	public final NetworkSerializable readData() throws RuntimeException
+	{
+		// Validate input stream
+		if (inputReader == null)
+		{
+			throw new NullPointerException("Class member 'inputReader' is null in NetworkConnection::readData.");
+		}
+
+		// Read data
+		synchronized (inputReader)
+		{
+			Object obj;
+			try
+			{
+				obj = inputReader.readObject();
+			}
+			catch (Exception e)
+			{
+				throw new RuntimeException(e);
+			}
+
+			if (obj instanceof NetworkSerializable)
+				return (NetworkSerializable) obj;
+
+			return null;
+		}
+	}
+
+	/**
+	 * Writes the specified <code>data</code> into the connection's output
+	 * stream, and flushes the stream.
+	 * 
+	 * @param <T>
+	 *            - the class type of the data received
+	 * @param data
+	 *            - the data object to send
+	 * 
+	 * @throws IllegalArgumentException
+	 *             - thrown when the parameter <code>data</code> is null.
+	 * @throws NullPointerException
+	 *             - thrown when the connection's output stream is null.
+	 * @throws RuntimeException
+	 *             - thrown when facing issues writing to the connection's
+	 *             output stream.
+	 * 
+	 * @see NetworkSerializable
+	 * 
+	 * @since 1.0
+	 * @author Mohammad Alali
+	 */
+	public final <T extends NetworkSerializable> void sendData(T data)
+			throws IllegalArgumentException, NullPointerException, RuntimeException
+	{
+		// Validate data parameter
+		if (data == null)
+		{
+			throw new IllegalArgumentException("Method parameter 'data' is null in NetworkConnection::sendData.");
+		}
+
+		// Validate output stream
+		if (outputWriter == null)
+		{
+			throw new NullPointerException("Class member 'outputWriter' is null in NetworkConnection::sendData.");
+		}
+
+		// Send data
+		synchronized (outputWriter)
+		{
+			try
+			{
+				outputWriter.writeObject(data);
+				outputWriter.flush();
+			}
+			catch (Exception e)
+			{
+				throw new RuntimeException(e);
 			}
 		}
 	}
