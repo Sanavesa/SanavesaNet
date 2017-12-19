@@ -1,4 +1,4 @@
-package testing;
+package sanavesa.test;
 
 import java.util.Scanner;
 
