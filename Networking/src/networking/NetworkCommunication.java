@@ -17,7 +17,7 @@ import java.net.Socket;
  * @since 1.0
  * @author Mohammad Alali
  */
-public final class NetworkCommunication
+final class NetworkCommunication
 {
 	/** The input stream of the connection. */
 	private final ObjectInputStream inputReader;
@@ -175,12 +175,12 @@ public final class NetworkCommunication
 	 *            - the data object to send
 	 * 
 	 * @throws IllegalArgumentException
-	 *             - thrown when the parameter <code>data</code> is null.
+	 *             thrown when the parameter <code>data</code> is null.
 	 * @throws NullPointerException
-	 *             - thrown when the connection's output stream is null.
+	 *             thrown when the connection's output stream is null.
 	 * @throws RuntimeException
-	 *             - thrown when facing issues writing to the connection's
-	 *             output stream.
+	 *             thrown when facing issues writing to the connection's output
+	 *             stream.
 	 * 
 	 * @see NetworkSerializable
 	 * 

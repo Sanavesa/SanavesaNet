@@ -1,7 +1,5 @@
 package networking;
 
-import networking.Server.ServerClient;
-
 /**
  * The <code>DisconnectClientPacket</code> class is a special packet type that
  * is used internally to disconnect clients from the server.
@@ -13,7 +11,7 @@ import networking.Server.ServerClient;
  * @since 1.0
  * @author Mohammad Alali
  */
-class DisconnectClientPacket implements NetworkSerializable
+final class DisconnectClientPacket implements NetworkSerializable
 {
 	/** The generated UID of the packet. */
 	private static final long serialVersionUID = 6860219879225649234L;

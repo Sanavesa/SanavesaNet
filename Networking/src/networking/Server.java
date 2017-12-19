@@ -8,8 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
-import networking.Client.ClientThread;
-
 /**
  * The Server class is the backend foundation for the server. It contains all
  * the network functionality with clients such as accepting new connections,
@@ -30,187 +28,23 @@ import networking.Client.ClientThread;
  */
 public class Server
 {
-	/**
-	 * The <code>ServerClient</code> class is the client representation on the
-	 * server side, a modification of the {@link Client} class. It contains the
-	 * essential features required to represent a client on the server. The data
-	 * transmission is handled by the {@link NetworkCommunication} class, which
-	 * runs on its own thread.
-	 * 
-	 * @see NetworkCommunication
-	 * @see Client
-	 * 
-	 * @since 1.0
-	 * @author Mohammad Alali
-	 */
-	public final class ServerClient extends Client
-	{
-		/** The server this client is connected to. */
-		private Server server = null;
-
-		/**
-		 * Constructs a new client on the server. It is used to represent the
-		 * client on the server side. Successful creation of a
-		 * <code>ServerClient</code> instance will trigger the
-		 * {@link #onConnected(String, int)} method, otherwise the
-		 * {@link #onFailedToConnect(String, int)} method will be triggered.
-		 *
-		 * @param server
-		 *            - the server the client has connected to
-		 * @param socket
-		 *            - the socket of the connected client
-		 * 
-		 * @throws IllegalArgumentException
-		 *             - thrown when the the parameter <code>server</code> or
-		 *             <code>socket</code> is null.
-		 * @throws RuntimeException
-		 *             - thrown when facing issues creating input and output
-		 *             streams for the socket.
-		 * 
-		 * @since 1.0
-		 * @author Mohammad Alali
-		 */
-		public ServerClient(Server server, Socket socket) throws IllegalArgumentException
-		{
-			// Validate server parameter
-			if (server == null)
-			{
-				throw new IllegalArgumentException(
-						"Constructor parameter 'server' is null in ServerClient::ServerClient.");
-			}
-
-			// Validate socket parameter
-			if (socket == null)
-			{
-				throw new IllegalArgumentException(
-						"Constructor parameter 'socket' is null in ServerClient::ServerClient.");
-			}
-
-			// Cache references
-			this.server = server;
-			this.socket = socket;
-
-			try
-			{
-				// Setup socket network communication
-				networkCommunication = new NetworkCommunication(socket);
-
-				// Setup separate thread for networking
-				connected = true;
-				communicationThread = new Thread(new ClientThread(this));
-				communicationThread.start();
-
-				// Trigger connection event
-				onConnected("", 0);
-			}
-			catch (Exception e)
-			{
-				// Trigger connection failure event
-				onFailedToConnect("", 0);
-
-				throw new RuntimeException(e);
-			}
-		}
-
-		/**
-		 * Propagate the connected event to the server.
-		 */
-		@Override
-		protected final void onConnected(String ipAddress, int port)
-		{
-			server.clientList.add(this);
-			server.onClientConnected(this);
-		}
-
-		/**
-		 * Propagate the disconnected event to the server.
-		 */
-		@Override
-		protected final void onDisconnected(String ipAddress, int port)
-		{
-			server.clientList.remove(this);
-			server.onClientDisconnected(this);
-		}
-
-		/**
-		 * Propagate the received data to the server.
-		 */
-		@Override
-		protected final <T extends NetworkSerializable> void onReceivedData(T data)
-		{
-			server.onReceivedData(data, this);
-		}
-	}
-
-	/**
-	 * The <code>ServerThread</code> class manages the networking transmission
-	 * on a separate thread. It will keep indefinitely listening for new
-	 * connections until the server's connection is terminated.
-	 * 
-	 * @see Server
-	 * 
-	 * @since 1.0
-	 * @author Mohammad Alali
-	 */
-	private class ServerThread implements Runnable
-	{
-		/** The server owner of this thread. */
-		private final Server server;
-
-		/**
-		 * Creates a new thread for the server, and calls begins the networking
-		 * communication loop.
-		 * 
-		 * @param server
-		 *            - the server owner of the thread
-		 * 
-		 * @see Server
-		 * 
-		 * @since 1.0
-		 * @author Mohammad Alali
-		 */
-		public ServerThread(Server server)
-		{
-			this.server = server;
-		}
-
-		/**
-		 * Starts the listening thread for the server that would keep listening
-		 * for new client connections while it is still running. This method
-		 * should not be called explicitly as it automatically managed by the
-		 * {@link Runnable} interface.
-		 * 
-		 * @see Server
-		 * 
-		 * @since 1.0
-		 * @author Mohammad Alali
-		 */
-		@Override
-		public void run()
-		{
-			server.run();
-		}
-	}
-
 	/** A list of the connected clients. */
-	private final List<ServerClient> clientList = new ArrayList<>();
+	final List<ServerClient> clientList = new ArrayList<>();
 
 	/** The server's own thread for listening to new connections. */
 	private Thread listeningThread = null;
 
 	/** A flag for whether the server is running or not. */
 	private volatile boolean running = false;
-	
+
 	/** The socket of the server. */
 	private ServerSocket serverSocket = null;
 
 	/**
 	 * Constructs a new <code>Server</code> instance. The constructor sets up
 	 * the shutdown hook for when the server is terminated unexpectedly by
-	 * disconnecting all clients from the server. It will terminate all
-	 * server connections and stop the listening thread.
-	 * 
-	 * @see #stopServer()
+	 * disconnecting all clients from the server. It will terminate all server
+	 * connections and stop the listening thread.
 	 * 
 	 * @since 1.1
 	 * @author Mohammad Alali
@@ -239,20 +73,6 @@ public class Server
 	public final List<ServerClient> getClientList()
 	{
 		return Collections.unmodifiableList(clientList);
-	}
-
-	/**
-	 * Returns the socket reference of the server. If there is no connection,
-	 * null will be returned.
-	 * 
-	 * @return the socket of the server
-	 * 
-	 * @since 1.0
-	 * @author Mohammad Alali
-	 */
-	public final ServerSocket getServerSocket()
-	{
-		return serverSocket;
 	}
 
 	/**
@@ -316,7 +136,7 @@ public class Server
 	 * @since 1.0
 	 * @author Mohammad Alali
 	 */
-	private final <T extends NetworkSerializable> void onReceivedData(T data, ServerClient sender)
+	final <T extends NetworkSerializable> void onReceivedData(T data, ServerClient sender)
 	{
 		data.handleOnServer(this, sender);
 	}
@@ -427,7 +247,7 @@ public class Server
 	 * @since 1.0
 	 * @author Mohammad Alali
 	 */
-	private final void run()
+	final void run()
 	{
 		while (isRunning())
 		{
@@ -449,6 +269,84 @@ public class Server
 	}
 
 	/**
+	 * Sends the specified data object to the specified client.
+	 * 
+	 * @param <T>
+	 *            - the class type of the data to send
+	 * @param data
+	 *            - the data to send to the specified client
+	 * @param recipient
+	 *            - the client who we want to send to
+	 * 
+	 * @throws IllegalArgumentException
+	 *             - thrown when <code>data</code> or <code>recipient</code> is
+	 *             null
+	 * @throws IllegalStateException
+	 *             - thrown when <code>recipient</code> is not connected
+	 * 
+	 * @since 1.0
+	 * @author Mohammad Alali
+	 */
+	public final <T extends NetworkSerializable> void sendDataTo(T data, ServerClient recipient)
+			throws IllegalArgumentException, IllegalStateException
+	{
+		if (data == null)
+		{
+			throw new IllegalArgumentException("Method parameter 'data' in Server::sendDataTo cannot be null.");
+		}
+
+		if (recipient == null)
+		{
+			throw new IllegalArgumentException("Method parameter 'recipient' in Server::sendDataTo cannot be null.");
+		}
+
+		if (!recipient.isConnected())
+		{
+			throw new IllegalStateException(
+					"Failed to send data to 'recipient' in Server::sendDataTo because the client is not connected.");
+		}
+
+		recipient.sendData(data);
+	}
+
+	/**
+	 * Sends the specified data object to all connected clients.
+	 * 
+	 * @param <T>
+	 *            - the class type of the data to send
+	 * @param data
+	 *            - the data to send to all connected clients
+	 * 
+	 * 
+	 * @throws IllegalArgumentException
+	 *             - thrown when <code>data</code> is null
+	 * @throws IllegalStateException
+	 *             - thrown when any supposedly connected {@link ServerClient}
+	 *             instance is not connected
+	 * 
+	 * @since 1.0
+	 * @author Mohammad Alali
+	 */
+	public final <T extends NetworkSerializable> void sendDataToAll(T data)
+			throws IllegalArgumentException, IllegalStateException
+	{
+		if (data == null)
+		{
+			throw new IllegalArgumentException("Method parameter 'data' in Server::sendDataToAll cannot be null.");
+		}
+
+		for (ServerClient client : clientList)
+		{
+			if (!client.isConnected())
+			{
+				throw new IllegalStateException(
+						"Failed to send data to a client in Server::sendDataToAll because the client is not connected.");
+			}
+			client.sendData(data);
+		}
+	}
+
+	/**
 	 * Sends the specified data object to the specified clients that are
 	 * identified by the predicate. All clients that match the condition
 	 * specified in the predicate will get the data.
@@ -460,55 +358,43 @@ public class Server
 	 * @param predicate
 	 *            - a predicate that defines which clients receive the packet
 	 * 
+	 * @throws IllegalArgumentException
+	 *             - thrown when <code>data</code> or <code>predicate</code> is
+	 *             null
+	 * @throws IllegalStateException
+	 *             - thrown when any supposedly connected {@link ServerClient}
+	 *             instance that matches the condition in the predicate is not
+	 *             connected
+	 * 
 	 * @since 1.0
 	 * @author Mohammad Alali
 	 */
-	public final <T extends NetworkSerializable> void sendDataTo(T data, Predicate<ServerClient> predicate)
+	public final <T extends NetworkSerializable> void sendDataToMatch(T data, Predicate<ServerClient> predicate)
+			throws IllegalArgumentException, IllegalStateException
 	{
+		if (data == null)
+		{
+			throw new IllegalArgumentException("Method parameter 'data' in Server::sendDataToMatch cannot be null.");
+		}
+
+		if (predicate == null)
+		{
+			throw new IllegalArgumentException(
+					"Method parameter 'predicate' in Server::sendDataToMatch cannot be null.");
+		}
+
 		for (ServerClient client : clientList)
 		{
 			if (predicate.test(client))
 			{
-				client.networkCommunication.sendData(data);
+				if (!client.isConnected())
+				{
+					throw new IllegalStateException(
+							"Failed to send data to a client in Server::sendDataToMatch because the client is not connected.");
+				}
+				client.sendData(data);
 			}
 		}
-	}
-
-	/**
-	 * Sends the specified data object to all connected clients.
-	 * 
-	 * @param <T>
-	 *            - the class type of the data to send
-	 * @param data
-	 *            - the data to send to all connected clients
-	 * 
-	 * @since 1.0
-	 * @author Mohammad Alali
-	 */
-	public final <T extends NetworkSerializable> void sendDataToAll(T data)
-	{
-		for (ServerClient client : clientList)
-		{
-			client.networkCommunication.sendData(data);
-		}
-	}
-
-	/**
-	 * Sends the specified data object to the specified client.
-	 * 
-	 * @param <T>
-	 *            - the class type of the data to send
-	 * @param data
-	 *            - the data to send to the specified client
-	 * @param recipient
-	 *            - the client who we want to send to
-	 * 
-	 * @since 1.0
-	 * @author Mohammad Alali
-	 */
-	public final <T extends NetworkSerializable> void sendDataToSingle(T data, ServerClient recipient)
-	{
-		recipient.networkCommunication.sendData(data);
 	}
 
 	/**
@@ -593,5 +479,37 @@ public class Server
 
 		// Reset instance
 		resetInstance();
+	}
+
+	/**
+	 * Returns a nicely formatted string representation of the server object
+	 * along with its connection status and number of connected clients.
+	 * 
+	 * @return formatted string of the server object
+	 * 
+	 * @since 1.1
+	 * @author Mohammad Alali
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder();
+
+		builder.append("Server ");
+		builder.append(super.toString());
+		builder.append("\n");
+		builder.append("Server Status: ");
+		if (isRunning())
+		{
+			builder.append("Online\n");
+			builder.append("Number of Connected Clients: ");
+			builder.append(clientList.size());
+		}
+		else
+		{
+			builder.append("Offline\n");
+		}
+
+		return builder.toString();
 	}
 }

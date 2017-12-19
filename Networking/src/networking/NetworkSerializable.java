@@ -5,8 +5,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import networking.Server.ServerClient;
-
 /**
  * The {@link NetworkSerializable} interface is the core of the networking data
  * transmission. It provides an interface that implemented, allows the

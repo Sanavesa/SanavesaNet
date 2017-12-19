@@ -8,11 +8,7 @@ import java.net.Socket;
  * The <code>Client</code> class is the back-end foundation for the
  * client-server architecture. It contains the essential features required to
  * represent a client. To fully utilize this class' capabilities, it is
- * preferable to extend the class to fine-tune the client. The data transmission
- * is handled by the {@link NetworkCommunication} class, which runs on its own
- * thread.
- * 
- * @see NetworkCommunication
+ * preferable to extend the class to fine-tune the client.
  * 
  * @since 1.0
  * @author Mohammad Alali
@@ -20,73 +16,69 @@ import java.net.Socket;
 public class Client
 {
 	/**
-	 * The <code>ClientThread</code> class manages the networking transmission
-	 * on a separate thread.
-	 * 
-	 * @see Client
-	 * 
-	 * @since 1.0
-	 * @author Mohammad Alali
-	 */
-	final class ClientThread implements Runnable
-	{
-		/** The client owner of this thread. */
-		private final Client client;
-
-		/**
-		 * Creates a new thread for the client, and calls begins the networking
-		 * communication loop.
-		 * 
-		 * @param client
-		 *            - the client owner of the thread
-		 * 
-		 * @see Client
-		 * 
-		 * @since 1.0
-		 * @author Mohammad Alali
-		 */
-		public ClientThread(Client client)
-		{
-			this.client = client;
-		}
-
-		/**
-		 * Starts the communication thread for the client that would keep
-		 * listening for new data while it is still connected. This method
-		 * should not be called explicitly as it automatically managed by the
-		 * {@link Runnable} interface.
-		 * 
-		 * @see Client
-		 * 
-		 * @since 1.0
-		 * @author Mohammad Alali
-		 */
-		@Override
-		public void run()
-		{
-			client.run();
-		}
-	}
-
-	/**
 	 * The duration in milliseconds for connection timeout. Default value is 5
 	 * seconds.
 	 */
-	protected final static int TIMEOUT_DURATION = 5000;
+	private static int TIMEOUT_DURATION = 5000;
+
+	/**
+	 * Gets the timeout duration for blocking until a connection is established
+	 * or an error occurs. A <code>duration</code> value of 0 is interpreted as
+	 * an infinite duration. The value returned can not be negative; only zero
+	 * and positive integers are allowed.
+	 * 
+	 * @return the timeout duration in milliseconds
+	 * 
+	 * @see #connect(String, int)
+	 * 
+	 * @since 1.1
+	 * @author Mohammad Alali
+	 */
+	public static int getTimeoutDuration()
+	{
+		return TIMEOUT_DURATION;
+	}
+
+	/**
+	 * Sets the timeout duration for blocking until a connection is established
+	 * or an error occurs. A <code>duration</code> value of 0 is interpreted as
+	 * an infinite duration.
+	 * 
+	 * @param duration
+	 *            - the timeout value to be used in milliseconds
+	 * 
+	 * @throws IllegalArgumentException
+	 *             - thrown when <code>duration</code> is a negative value
+	 * 
+	 * @see #connect(String, int)
+	 * 
+	 * @since 1.1
+	 * @author Mohammad Alali
+	 */
+	public static void setTimeoutDuration(int duration)
+	{
+		if (duration < 0)
+		{
+			throw new IllegalArgumentException(
+					"Method parameter 'duration' in Client::setTimeoutDuration cannot be negative.");
+		}
+
+		TIMEOUT_DURATION = duration;
+	}
 
 	/**
 	 * The client's own thread to handle incoming and outgoing communication.
 	 */
-	Thread communicationThread = null;
+	private Thread communicationThread = null;
 
 	/** A flag of whether the client is connected. */
-	volatile boolean connected = false;
+	private volatile boolean connected = false;
 
 	/** The communication for the socket. */
-	NetworkCommunication networkCommunication = null;
+	private NetworkCommunication networkCommunication = null;
 
 	/** The client's socket. */
-	Socket socket = null;
+	private Socket socket = null;
 
 	/**
 	 * Constructs a new <code>Client</code> instance. The constructor sets up
@@ -230,37 +222,6 @@ public class Client
 	}
 
 	/**
-	 * If the client is connected to a server, this method will return the
-	 * network communication instance of the client that aids in transmitting
-	 * and receiving data from the server. And if the client is not connected,
-	 * this method will return null.
-	 * 
-	 * @return the network communication instance with server, if the client is
-	 *         connected; otherwise, returns null
-	 * 
-	 * @since 1.0
-	 * @author Mohammad Alali
-	 */
-	public final NetworkCommunication getCommunication()
-	{
-		return networkCommunication;
-	}
-
-	/**
-	 * Returns the socket reference of the client. If there is no connection,
-	 * null will be returned.
-	 * 
-	 * @return the socket of the client
-	 * 
-	 * @since 1.0
-	 * @author Mohammad Alali
-	 */
-	protected final Socket getSocket()
-	{
-		return socket;
-	}
-
-	/**
 	 * Returns the connection status of the client.
 	 * 
 	 * @return true if the client is connected to the server; false otherwise
@@ -338,7 +299,7 @@ public class Client
 	 * @since 1.0
 	 * @author Mohammad Alali
 	 */
-	<T extends NetworkSerializable> void onReceivedData(T data)
+	private <T extends NetworkSerializable> void onReceivedData(T data)
 	{
 		data.handleOnClient(this);
 	}
@@ -350,7 +311,7 @@ public class Client
 	 * @since 1.0
 	 * @author Mohammad Alali
 	 */
-	final void resetInstance()
+	private final void resetInstance()
 	{
 		// Change the connection flag
 		connected = false;
@@ -408,7 +369,7 @@ public class Client
 	 * @since 1.0
 	 * @author Mohammad Alali
 	 */
-	private final void run()
+	final void run()
 	{
 		while (isConnected())
 		{
@@ -440,11 +401,50 @@ public class Client
 	 * @param data
 	 *            - the data to send to the server
 	 * 
+	 * @throws IllegalArgumentException
+	 *             thrown when the parameter <code>data</code> is null.
+	 * @throws NullPointerException
+	 *             thrown when the connection's output stream is null.
+	 * @throws RuntimeException
+	 *             thrown when facing issues writing to the connection's output
+	 *             stream.
+	 * 
 	 * @since 1.1
 	 * @author Mohammad Alali
 	 */
 	public final <T extends NetworkSerializable> void sendData(T data)
+			throws IllegalArgumentException, NullPointerException, RuntimeException
 	{
 		networkCommunication.sendData(data);
+	}
+
+	/**
+	 * Returns a nicely formatted string representation of the client object
+	 * along with its connection status.
+	 * 
+	 * @return formatted string of the client object
+	 * 
+	 * @since 1.1
+	 * @author Mohammad Alali
+	 */
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder();
+
+		builder.append("Client ");
+		builder.append(super.toString());
+		builder.append("\n");
+		builder.append("Client Status: ");
+		if (isConnected())
+		{
+			builder.append("Connected\n");
+		}
+		else
+		{
+			builder.append("Disconnected\n");
+		}
+
+		return builder.toString();
 	}
 }
