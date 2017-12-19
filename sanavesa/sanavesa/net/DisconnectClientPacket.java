@@ -47,7 +47,7 @@ final class DisconnectClientPacket implements NetworkSerializable
 	 *            - the class type of the server who received this object
 	 * @param server
 	 *            - the server who read this serializable object
-	 * @param client
+	 * @param sender
 	 *            - the client who wants to disconnect
 	 * 
 	 * @see Server

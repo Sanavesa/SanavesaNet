@@ -15,10 +15,13 @@ public class CTest extends Client
 		s.next();
 		s.close();
 		
-		System.exit(0);
+		c.disconnect();
+//		System.exit(0);
 		
 //		Thread.sleep(1000);
 //		c.disconnect();
+		
+		System.out.println("Still here");
 	}
 	
 	@Override
@@ -38,6 +41,5 @@ public class CTest extends Client
 	protected void onDisconnected(String ipAddress, int port)
 	{
 		System.out.println("disconnected");
-		System.exit(0);
 	}
 }

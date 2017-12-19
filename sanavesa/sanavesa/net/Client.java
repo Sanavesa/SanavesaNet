@@ -86,8 +86,6 @@ public class Client
 	 * disconnecting from the server. It will terminate the connection and its
 	 * streams, and stop the communication thread.
 	 * 
-	 * @see #disconnect()
-	 * 
 	 * @since 1.1
 	 * @author Mohammad Alali
 	 */
@@ -252,7 +250,8 @@ public class Client
 
 	/**
 	 * This method is triggered automatically when the client has successfully
-	 * disconnected from a server via the {@link #disconnect()} method.
+	 * disconnected from a server via the {@link #disconnect()} method. Avoid
+	 * using {@link System#exit(int)} in this method.
 	 * 
 	 * @param ipAddress
 	 *            - the IP address of the server we disconnected from

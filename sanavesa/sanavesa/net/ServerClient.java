@@ -35,7 +35,9 @@ public final class ServerClient
 	/**
 	 * Constructs a new client on the server. It is used to represent the client
 	 * on the server side. This class shouldn't be instantiated manually as it
-	 * is handled automatically by the library.
+	 * is handled automatically by the library. The
+	 * {@link Server#onClientConnected(ServerClient)} method will be triggered on
+	 * a successful disconnection.
 	 *
 	 * @param server
 	 *            - the server the client has connected to
@@ -92,8 +94,8 @@ public final class ServerClient
 	/**
 	 * Disconnect the client from the server. If already disconnected, the
 	 * method will terminate early and do nothing. The
-	 * {@link #onDisconnected(String, int)} method will be triggered on a
-	 * successful disconnection.
+	 * {@link Server#onClientDisconnected(ServerClient)} method will be triggered
+	 * on a successful disconnection.
 	 * 
 	 * @since 1.0
 	 * @author Mohammad Alali

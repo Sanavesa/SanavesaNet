@@ -49,7 +49,7 @@ public interface NetworkSerializable extends Serializable
 	 *            - the class type of the server who received this object
 	 * @param server
 	 *            - the server who read this serializable object
-	 * @param client
+	 * @param sender
 	 *            - the client who sent this object
 	 * 
 	 * @see Server

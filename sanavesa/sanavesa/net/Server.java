@@ -120,7 +120,7 @@ public class Server
 	 * This method is triggered automatically when the server has received data
 	 * from any client. The data received is a class that implements the
 	 * {@link NetworkSerializable} interface. The data received is handled by
-	 * the interface via the {@link NetworkSerializable#handleOnServer(Server)}
+	 * the interface via the {@link NetworkSerializable#handleOnServer(Server, ServerClient)}
 	 * method.
 	 * 
 	 * @param <T>
