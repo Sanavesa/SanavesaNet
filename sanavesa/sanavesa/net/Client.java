@@ -165,8 +165,7 @@ public class Client
 	/**
 	 * Disconnect the client from the server. If already disconnected, the
 	 * method will terminate early and do nothing. The
-	 * {@link #onDisconnected(String, int)} method will be triggered on a
-	 * successful disconnection.
+	 * {@link #onDisconnectedLocally(String, int)} method will be triggered.
 	 * 
 	 * @since 1.0
 	 * @author Mohammad Alali
@@ -181,8 +180,10 @@ public class Client
 	 * <code>notifyDisconnection</code> is used as follows:
 	 * 
 	 * <ul>
-	 * <li><b>true</b> - if the disconnection request was made locally.</li>
-	 * <li><b>false</b> - if disconnection request was made remotely.</li>
+	 * <li><b>true</b> - if the disconnection request was made locally. Calls
+	 * {@link #onDisconnectedLocally(String, int)}. </li>
+	 * <li><b>false</b> - if disconnection request was made remotely. Calls
+	 * {@link #onDisconnectedRemotely(String, int)}. </li>
 	 * </ul>
 	 * 
 	 * @param notifyDisconnection
@@ -200,20 +201,29 @@ public class Client
 			return;
 		}
 
-		// If disconnection request was made locally, then notify the other side
-		// of communication about it.
-		if (notifyDisconnection)
-		{
-			DisconnectClientPacket disconnectionPacket = new DisconnectClientPacket();
-			networkCommunication.sendData(disconnectionPacket);
-		}
-
 		// Cache values before reseting them
 		String ipAddress = socket.getInetAddress().getHostAddress();
 		int port = socket.getPort();
 
 		// Trigger the event
-		onDisconnected(ipAddress, port);
+		if (notifyDisconnection)
+		{
+			// Disconnection request was from the client
+			onDisconnectedLocally(ipAddress, port);
+		}
+		else
+		{
+			// Disconnection request was from the server
+			onDisconnectedRemotely(ipAddress, port);
+		}
+
+		// If disconnection request was made locally, then notify the other side
+		// of communication about it.
+		if (notifyDisconnection)
+		{
+			DisconnectClientPacket disconnectionPacket = new DisconnectClientPacket();
+			sendData(disconnectionPacket);
+		}
 
 		// Reset socket locally
 		resetInstance();
@@ -249,9 +259,10 @@ public class Client
 	}
 
 	/**
-	 * This method is triggered automatically when the client has successfully
-	 * disconnected from a server via the {@link #disconnect()} method. Avoid
-	 * using {@link System#exit(int)} in this method.
+	 * This method is triggered automatically when the client has requested to
+	 * disconnect from a server via the {@link #disconnect()} method. The client
+	 * is allowed to send messages to the server as the connection unlike
+	 * {@link #onDisconnectedRemotely(String, int)}.
 	 * 
 	 * @param ipAddress
 	 *            - the IP address of the server we disconnected from
@@ -261,7 +272,24 @@ public class Client
 	 * @since 1.0
 	 * @author Mohammad Alali
 	 */
-	protected void onDisconnected(String ipAddress, int port)
+	protected void onDisconnectedLocally(String ipAddress, int port)
+	{
+	}
+
+	/**
+	 * This method is triggered automatically when the client has been
+	 * disconnected from the server. Since the client is disconnected, sending
+	 * messages will throw an exception.
+	 * 
+	 * @param ipAddress
+	 *            - the IP address of the server we disconnected from
+	 * @param port
+	 *            - the port of the server we disconnected from
+	 * 
+	 * @since 1.0
+	 * @author Mohammad Alali
+	 */
+	protected void onDisconnectedRemotely(String ipAddress, int port)
 	{
 	}
 

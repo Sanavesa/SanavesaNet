@@ -474,11 +474,11 @@ public class Server
 		// Cache port before reseting it
 		int port = serverSocket.getLocalPort();
 
-		// Trigger the event
-		onServerStopped(port);
-
 		// Reset instance
 		resetInstance();
+		
+		// Trigger the event
+		onServerStopped(port);
 	}
 
 	/**
