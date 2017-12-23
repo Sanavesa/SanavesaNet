@@ -138,20 +138,18 @@ public class ClientGUI extends Application
 		button.disableProperty().bind(nameField.textProperty().isEmpty());
 		button.setOnAction(e ->
 		{
-			if(nameField.getText().isEmpty())
-			{
+			localName = nameField.getText();
+			if(localName == null || localName.length() == 0)
 				localName = "User" + (int)Math.ceil(Math.random()*1000);
-			}
-			else
-			{
-				localName = nameField.getText();
-			}
+			
 			stage.close();
 		});
 		
 		stage.setOnCloseRequest(e ->
 		{
-			button.fire();
+			localName = nameField.getText();
+			if(localName == null || localName.length() == 0)
+				localName = "User" + (int)Math.ceil(Math.random()*1000);
 		});
 		
 		root.getChildren().addAll(label, nameField, button);
